@@ -1,7 +1,7 @@
 import { Room, Client, ServerError } from "colyseus";
 import { GameRoomState } from "./schema/GameRoomState";
 import { Player } from "./Player";
-
+import {verifyJwtToken} from "../auth"
 export class GameRoom extends Room {
 
   private playerMap: Map<string, Player>;
@@ -37,16 +37,13 @@ export class GameRoom extends Room {
   }
 
   onAuth(client: Client, options: any) {
-    console.log(client.sessionId);
-    if (this.playerMap.has(client.sessionId)) {
-      throw new ServerError(401, "You are already in this lobby");
-    }
-    return client;
+    const token = verifyJwtToken(options.token);
+    return {username: "reee"};
   }
 
   onJoin (client: Client, options: any) {
     console.log(client.sessionId);
-    this.playerMap.set(client.sessionId, new Player(client.sessionId));
+    this.playerMap.set(client.sessionId, new Player(10, "testo testo"));
   }
 
   onLeave (client: Client, consented: boolean) {

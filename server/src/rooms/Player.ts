@@ -1,5 +1,8 @@
 
 
 export class Player {
-    constructor(public readonly id: string) {}
+    sockerId: string;
+    constructor(public readonly id: number, public readonly username: string) {}
+
+    setSocketId = (socId: string) => this.sockerId = socId
 }

@@ -3,9 +3,11 @@ import express from "express";
 import cors from "cors";
 import { Server } from "colyseus";
 import { monitor } from "@colyseus/monitor";
-// import socialRoutes from "@colyseus/social/express"
+//import socialRoutes from "@colyseus/social/express"
 
 import { GameRoom } from "./rooms/GameRoom";
+import { authenticateTokenMiddleware } from "./auth";
+import { loginHandler } from "./routes/login";
 
 const port = Number(process.env.PORT || 2567);
 const app = express()
@@ -28,10 +30,15 @@ gameServer.define('game_room', GameRoom);
  * - uncomment if you want to use default authentication (https://docs.colyseus.io/server/authentication/)
  * - also uncomment the import statement
  */
-// app.use("/", socialRoutes);
+//app.use("/", socialRoutes);
 
 // register colyseus monitor AFTER registering your room handlers
 app.use("/colyseus", monitor());
 
+// basic api stuff
+app.post("/login", loginHandler)
+app.get("/auth", authenticateTokenMiddleware, (req: any, res: any) => {
+  res.send("Haha");
+})
 gameServer.listen(port);
 console.log(`Listening on ws://localhost:${ port }`)
