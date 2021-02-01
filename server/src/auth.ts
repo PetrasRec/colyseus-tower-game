@@ -15,10 +15,7 @@ const authenticateTokenMiddleware = (req: any, res:any, next: any) => {
     })
 };
 
-const verifyJwtToken = (token: string) => {
-    let user = jwt.verify(token, "access secret :o" as string);
-    return user;
-}; 
+const verifyJwtToken = (token: string): any => jwt.verify(token, "access secret :o" as string);
 
 const generateAccessToken = (playerData: any) => {
     console.log(playerData);

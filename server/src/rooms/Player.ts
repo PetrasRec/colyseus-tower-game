@@ -1,8 +1,19 @@
+import { Schema, type, MapSchema } from "@colyseus/schema";
 
+export class Player extends Schema {
+    @type("string")
+    socketId: string;
+    @type("string")
+    id: string;
 
-export class Player {
-    sockerId: string;
-    constructor(public readonly id: number, public readonly username: string) {}
+    @type("string")
+    username: string;
 
-    setSocketId = (socId: string) => this.sockerId = socId
+    constructor(id: string, username: string, socketId: string) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.socketId = socketId;
+    }
+
 }

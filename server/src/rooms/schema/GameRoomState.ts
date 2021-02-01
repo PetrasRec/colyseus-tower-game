@@ -1,6 +1,6 @@
-import { Schema, type } from "@colyseus/schema";
+import { Schema, type, MapSchema } from "@colyseus/schema";
 import { GameState } from "./GameState";
-
+import { Player } from "../Player";
 enum LobbyState {
   PLAYING = 1,
   FINISHED = 2,
@@ -9,18 +9,46 @@ enum LobbyState {
 
 export class GameRoomState extends Schema {
   @type("string")
-  title: string;
+  public title: string;
 
   @type("number")
-  lobbyState : LobbyState;
+  public lobbyState : LobbyState;
 
   @type(GameState)
-  gameState : GameState;
+  public gameState : GameState;
 
-  constructor(roomTitle: string) {
+  @type({ map: Player })
+  public playerMap: MapSchema<Player>;
+
+  @type("number")
+  public maxPlayers: number;
+
+  @type("string")
+  public lobbyOwnerId: string
+  constructor(roomTitle: string, lobbyOwnerId: string) {
     super();
     this.title = roomTitle;
     this.lobbyState = LobbyState.WAITING_FOR_PLAYERS;
+    this.maxPlayers = 4;
+    this.playerMap = new MapSchema<Player>();
   }
   
+  addNewPlayer(player: Player) {
+    if (this.playerMap.has(player.id)) {
+      throw new Error("You have already joined this lobby");
+    }
+    if (this.maxPlayers == this.playerMap.size) {
+      throw new Error("max player count reached");
+    }
+
+    this.playerMap.set(player.id, player);
+  }
+
+  removePlayer(player: Player) {
+    this.playerMap.delete(player.id);
+  }
+
+  existsPlayer(playerId: string) {
+    return this.playerMap.has(playerId);
+  }
 }
