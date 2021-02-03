@@ -18,19 +18,28 @@ export class GameRoom extends Room {
 
     // Chat system of the room
     this.onMessage("messages", (client, message) => {
-      this.broadcast("messages", `(${client?.auth?.username}) ${message}`);
+      const times = new Date().toTimeString().split(":");
+      this.broadcast("messages", {
+        username: client?.auth?.username,
+        message: message,
+        time: times[0] + ":" + times[1]
+      });
     });
 
-    this.onMessage("start_lobby", (client) => {
+    this.onMessage("start_lobby", (client, message) => {
+      console.log("Start lobby!!!", this.state);
       // Lobby already has started or ended
-      if (this.state.gameState !== 3) {
+      if (this.state.lobbyState !== 3) {
+        
         return;
       }
 
       // PLAYING State is 1, much wow
-      this.state.gameState = 1;
+      this.state.lobbyState = 1;
+
+      this.broadcast("start_lobby", {});
     });
- 
+    
     // This will be return on prop 'metadata' when quering all rooms
     this.setMetadata({
       title: options.title,
