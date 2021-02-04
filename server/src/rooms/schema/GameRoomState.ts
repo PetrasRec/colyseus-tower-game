@@ -1,5 +1,5 @@
 import { Schema, type, MapSchema } from "@colyseus/schema";
-import { GameState } from "./GameState";
+import { GameState } from "../../game/GameState";
 import { Player } from "../Player";
 enum LobbyState {
   PLAYING = 1,
@@ -31,6 +31,7 @@ export class GameRoomState extends Schema {
     this.lobbyState = LobbyState.WAITING_FOR_PLAYERS;
     this.maxPlayers = 4;
     this.playerMap = new MapSchema<Player>();
+    this.gameState = new GameState();
   }
   
   addNewPlayer(player: Player) {

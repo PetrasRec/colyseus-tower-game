@@ -30,7 +30,7 @@ export class GameRoom extends Room {
       console.log("Start lobby!!!", this.state);
       // Lobby already has started or ended
       if (this.state.lobbyState !== 3) {
-        
+    
         return;
       }
 
