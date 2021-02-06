@@ -7,4 +7,11 @@ export default class Position extends Schema {
     y: number;
     @type("float64")
     z: number;
+
+    constructor(x: number, y: number, z:number) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 }

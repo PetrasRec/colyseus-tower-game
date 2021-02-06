@@ -30,7 +30,13 @@ export default class Player extends Entity {
     components: PlayerComponents
 
     constructor() {
-        super("@ref-scene", "@model-cannon");
+        super("@ref-scene", "@model-cannon", "player");
         this.components = new PlayerComponents();
+    }
+    update() {
+        
+    }
+    getRootName(): string {
+        return "player";
     }
 }

@@ -1,4 +1,4 @@
-import { Room, Client, ServerError } from "colyseus";
+import { Room, Client, ServerError, Delayed } from "colyseus";
 import { GameRoomState } from "./schema/GameRoomState";
 import { Player } from "./Player";
 import {verifyJwtToken} from "../auth"
@@ -7,6 +7,35 @@ export class GameRoom extends Room {
 
   constructor() {
     super();
+  }
+  private gameLoop!: Delayed;
+  private timerLoop!: Delayed;
+
+  // 1000 is 1 second
+  startGameLoop = () =>  {
+    const loopInterval = 100;
+    this.gameLoop = this.clock.setInterval(this.updateState, loopInterval);
+    
+    this.timerLoop = this.clock.setInterval(()=> {
+      this.state.warmupTimeSeconds--;
+      if (this.state.warmupTimeSeconds <= 0) {
+        this.timerLoop.clear();
+      }
+    }, 1000)
+  }
+
+  
+  stopGameLoop = () =>  {
+      this.gameLoop.clear();
+  }
+
+
+  // Here write state updates, updated state will be automatically sent to client
+  updateState = () => {
+    if (this.state.warmupTimeSeconds > 0) {
+      return;
+    }
+    this.state.lobbyState = this.state.lobbyState == 3 ? 4 : 3;
   }
 
   onCreate (options: any) {
@@ -38,7 +67,9 @@ export class GameRoom extends Room {
       this.state.lobbyState = 1;
 
       this.broadcast("start_lobby", {});
+      this.startGameLoop();
     });
+
     
     // This will be return on prop 'metadata' when quering all rooms
     this.setMetadata({

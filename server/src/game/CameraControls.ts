@@ -29,7 +29,14 @@ export default class CameraControls extends Entity {
     components: CameraControlsComponents
 
     constructor() {
-        super("@ref-scene", null)
+        super("@ref-scene", null, "cameraControls")
         this.components = new CameraControlsComponents();
+    }
+    update() {
+        
+    }
+    
+    getRootName(): string {
+        return "cameraControls";
     }
 }

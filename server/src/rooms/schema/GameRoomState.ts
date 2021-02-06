@@ -23,6 +23,9 @@ export class GameRoomState extends Schema {
   @type("number")
   public maxPlayers: number;
 
+  @type("number")
+  public warmupTimeSeconds: number;
+
   @type("string")
   public lobbyOwnerId: string
   constructor(roomTitle: string, lobbyOwnerId: string) {
@@ -32,6 +35,10 @@ export class GameRoomState extends Schema {
     this.maxPlayers = 4;
     this.playerMap = new MapSchema<Player>();
     this.gameState = new GameState();
+    
+    
+    // Set warmup time in seconds
+    this.warmupTimeSeconds = 60;
   }
   
   addNewPlayer(player: Player) {

@@ -1,4 +1,4 @@
-import { Schema, type, ArraySchema } from "@colyseus/schema";
+import { Schema, type, ArraySchema, MapSchema } from "@colyseus/schema";
 import Player from "./Player";
 import Entity from "./entity";
 import Tower from "./Tower";
@@ -11,6 +11,9 @@ export class GameState extends Schema {
   @type([Entity])
   entities = new ArraySchema<Entity>();
 
+  @type({map: "number" })
+  public entityIDs: MapSchema<number>;
+
   constructor() {
     super();
     this.entities.push(new Player());
@@ -19,6 +22,10 @@ export class GameState extends Schema {
     this.entities.push(new AmbientLight());
     this.entities.push(new DirectionalLight());
     this.entities.push(new Terrain());
+  }
+
+  update() {
+    this.entities.forEach(e => e.update());
   }
   
 }
