@@ -1,6 +1,7 @@
-import { Schema, type, MapSchema } from "@colyseus/schema";
+import { Schema, type, MapSchema, SetSchema } from "@colyseus/schema";
+import { WARMUP_TIME } from "../../game/constants";
 import { GameState } from "../../game/GameState";
-import { Player } from "../Player";
+import { AuthUser } from "../AuthUser";
 enum LobbyState {
   PLAYING = 1,
   FINISHED = 2,
@@ -17,8 +18,13 @@ export class GameRoomState extends Schema {
   @type(GameState)
   public gameState : GameState;
 
-  @type({ map: Player })
-  public playerMap: MapSchema<Player>;
+  // key player id
+  @type({ set: "string" })
+  public playerSet: SetSchema<string> = new SetSchema<string>();
+
+  // key socker id
+  @type ({ map: AuthUser})
+  public playerMap: MapSchema<AuthUser> = new MapSchema<AuthUser>();
 
   @type("number")
   public maxPlayers: number;
@@ -33,30 +39,49 @@ export class GameRoomState extends Schema {
     this.title = roomTitle;
     this.lobbyState = LobbyState.WAITING_FOR_PLAYERS;
     this.maxPlayers = 4;
-    this.playerMap = new MapSchema<Player>();
-    this.gameState = new GameState();
-    
-    
     // Set warmup time in seconds
-    this.warmupTimeSeconds = 60;
+    this.warmupTimeSeconds = WARMUP_TIME;
   }
   
-  addNewPlayer(player: Player) {
-    if (this.playerMap.has(player.id)) {
+  onPlayerInput(sessionID: string, data: any) {
+      const player : AuthUser = this.playerMap.get(sessionID);
+      
+  }
+
+  update() {
+    this.gameState.update();
+  }
+
+  startGame() {
+    this.gameState = new GameState(this.playerMap);
+  }
+
+  onSecondPassed() {
+    if (this.warmupTimeSeconds > 0) {
+      this.warmupTimeSeconds--;
+    } else {
+      this.gameState.onSecondPassed();
+    }
+  }
+
+  addNewPlayer(player: AuthUser) {
+    if (this.playerSet.has(player.id)) {
       throw new Error("You have already joined this lobby");
     }
     if (this.maxPlayers == this.playerMap.size) {
       throw new Error("max player count reached");
     }
 
+    this.playerSet.add(player.socketId);
     this.playerMap.set(player.id, player);
   }
 
-  removePlayer(player: Player) {
-    this.playerMap.delete(player.id);
+  removePlayer(player: AuthUser) {
+    this.playerMap.delete(player.socketId);
+    this.playerSet.delete(player.id);
   }
 
   existsPlayer(playerId: string) {
-    return this.playerMap.has(playerId);
+    return this.playerSet.has(playerId);
   }
 }

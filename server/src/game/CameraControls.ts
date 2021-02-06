@@ -1,5 +1,6 @@
 import Entity from "./entity";
 import { Schema, type, ArraySchema } from "@colyseus/schema";
+import Position from "./position";
 
 class CameraControllerManager extends Schema {
     @type([ "string"])
@@ -8,8 +9,8 @@ class CameraControllerManager extends Schema {
     constructor() {
         super();
         // For now this is HARDCODED ?
-      //  this.ctor.push("@entity-player1");
-      //  this.ctor.push("@ref-domElement");
+        this.ctor.push("@entity-player1");
+        this.ctor.push("@ref-domElement");
     }
 }
 
@@ -28,8 +29,8 @@ export default class CameraControls extends Entity {
     @type(CameraControlsComponents)
     components: CameraControlsComponents
 
-    constructor() {
-        super("@ref-scene", null, "cameraControls")
+    constructor(position: Position) {
+        super("@ref-scene", null, "cameraControls", position)
         this.components = new CameraControlsComponents();
     }
     update() {

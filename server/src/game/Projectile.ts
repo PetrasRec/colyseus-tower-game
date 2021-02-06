@@ -27,10 +27,11 @@ export default class Projectile extends Entity {
     @type(ProjectileComponents)
     components: ProjectileComponents
 
-    constructor() {
+    constructor(position: Position) {
         super("@ref-scene", "@model-cannon", "projectile");
         this.components = new ProjectileComponents();
     }
+    
     update() {
         
     }

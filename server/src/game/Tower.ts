@@ -1,11 +1,14 @@
 import Entity from "./entity";
 import { Schema, type } from "@colyseus/schema";
+import Position from "./position";
 
 
 export default class Tower extends Entity {
-    constructor() {
-        super("@ref-scene", "@model-tower", "tower")
+    constructor(position: Position, id: number) {
+        super("@ref-scene", "@model-tower", "tower", position)
+        this.updateRootNameID(id);
     }
+
     update() {
         
     }

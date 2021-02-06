@@ -1,6 +1,4 @@
 import jwt from "jsonwebtoken"
-import { Player } from "./rooms/Player"
-
 
 const authenticateTokenMiddleware = (req: any, res:any, next: any) => {
     // Gather the jwt access token from the request header

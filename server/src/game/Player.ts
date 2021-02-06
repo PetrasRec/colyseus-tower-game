@@ -1,5 +1,7 @@
 import Entity from "./entity";
 import { Schema, type } from "@colyseus/schema";
+import Position from "./position";
+import { AuthUser } from "../rooms/AuthUser";
 
 class CanonController extends Schema {
     @type("number")
@@ -29,12 +31,28 @@ export default class Player extends Entity {
     @type(PlayerComponents)
     components: PlayerComponents
 
-    constructor() {
-        super("@ref-scene", "@model-cannon", "player");
+    @type(AuthUser)
+    authUser: AuthUser;
+
+    @type("number")
+    health: number;
+
+    @type("boolean")
+    isAlive: boolean;
+
+    constructor(position: Position, id: number) {
+        super("@ref-scene", "@model-cannon", "player", position);
         this.components = new PlayerComponents();
+        this.updateRootNameID(id);
     }
-    update() {
+
+    assignAuthUser(authUser: AuthUser) {
+        this.authUser = authUser; 
+    }
+
+    update(): boolean {
         
+        return true;
     }
     getRootName(): string {
         return "player";

@@ -1,10 +1,10 @@
 import { Room, Client, ServerError, Delayed } from "colyseus";
 import { GameRoomState } from "./schema/GameRoomState";
-import { Player } from "./Player";
+import { AuthUser } from "./AuthUser";
 import {verifyJwtToken} from "../auth"
+import MapLoader from "../game/gameMapLoader";
+
 export class GameRoom extends Room {
-
-
   constructor() {
     super();
   }
@@ -13,18 +13,17 @@ export class GameRoom extends Room {
 
   // 1000 is 1 second
   startGameLoop = () =>  {
+    // create gameState and set up some vars
+    this.state.startGame();
     const loopInterval = 100;
     this.gameLoop = this.clock.setInterval(this.updateState, loopInterval);
-    
-    this.timerLoop = this.clock.setInterval(()=> {
-      this.state.warmupTimeSeconds--;
-      if (this.state.warmupTimeSeconds <= 0) {
-        this.timerLoop.clear();
-      }
-    }, 1000)
+    this.timerLoop = this.clock.setInterval(this.onSecondPassed, 1000)
   }
 
-  
+  onSecondPassed = () => {
+    this.state.onSecondPassed();
+  }
+
   stopGameLoop = () =>  {
       this.gameLoop.clear();
   }
@@ -35,10 +34,16 @@ export class GameRoom extends Room {
     if (this.state.warmupTimeSeconds > 0) {
       return;
     }
-    this.state.lobbyState = this.state.lobbyState == 3 ? 4 : 3;
+    this.state.update();
+  }
+
+  // data must have a token
+  onPlayerInput(client: Client, data: any) {
+    this.state.onPlayerInput(client.sessionId, data);
   }
 
   onCreate (options: any) {
+    MapLoader("Badwater");
     const userData = verifyJwtToken(options.token);
     console.log("On Create room", options);
     this.setState(new GameRoomState(options?.title, userData.id));
@@ -70,7 +75,8 @@ export class GameRoom extends Room {
       this.startGameLoop();
     });
 
-    
+    // Manager player input
+    this.onMessage("player_input", this.onPlayerInput);
     // This will be return on prop 'metadata' when quering all rooms
     this.setMetadata({
       title: options.title,
@@ -80,6 +86,11 @@ export class GameRoom extends Room {
       }
     });
   }
+  getUserFromToken(client: Client, token: string) : AuthUser {
+    const userData = verifyJwtToken(token);
+    return new AuthUser(<string>userData.id, <string>userData?.username || "invalid username", client.sessionId);;
+  }
+
   // If onAuth() returns a truthy value, onJoin() is going to be called with the returned value as the third argument.
   // If onAuth() returns a falsy value, the client is immediatelly rejected, causing the matchmaking function call from the client-side to fail.
   onAuth(client: Client, options: any) {
@@ -87,11 +98,13 @@ export class GameRoom extends Room {
       return false;
     }
 
-    const userData = verifyJwtToken(options.token);
-    if (this.state.existsPlayer(<string>userData.id)) {
+    const user = this.getUserFromToken(client, options.token);
+
+    if (this.state.existsPlayer(user.id)) {
       return false;
     }
-    return new Player(<string>userData.id, <string>userData?.username || "invalid username", client.sessionId);;
+
+    return user;
   }
 
   onJoin (client: Client, options: any) {

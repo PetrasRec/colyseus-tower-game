@@ -1,6 +1,6 @@
 import { Schema, type, MapSchema } from "@colyseus/schema";
 
-export class Player extends Schema {
+export class AuthUser extends Schema {
     @type("string")
     socketId: string;
     @type("string")
