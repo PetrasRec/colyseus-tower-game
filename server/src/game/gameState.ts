@@ -68,6 +68,8 @@ export class GameState extends Schema {
     if (this.turnTime <= 0) {
       this.setNextPlayerTurn();
     }
+
+    console.log(this.turnTime)
   }
 
   onPlayerInput(user: AuthUser, input: any) {
@@ -82,7 +84,11 @@ export class GameState extends Schema {
     this.playerTurnIndex = (this.playerTurnIndex + 1) % this.players.length;
     this.turnTime = TURN_TIME;
     // Switch camera to target current player.
-    const player = this.players[this.playerTurnIndex]; 
+    const player = this.players[this.playerTurnIndex];
+
+    (this.entities.find((entity) => {
+      return entity.name === 'cameraControls';
+    }) as CameraControls).components.cameraController.player = `@entity-${player.name}`
   }
 
 

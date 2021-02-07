@@ -1,7 +1,7 @@
 import { Schema, type, MapSchema, SetSchema } from "@colyseus/schema";
 import { WARMUP_TIME } from "../../game/constants";
-import { GameState } from "../../game/GameState";
 import { AuthUser } from "../AuthUser";
+import {GameState} from "../../game/gameState";
 enum LobbyState {
   PLAYING = 1,
   FINISHED = 2,

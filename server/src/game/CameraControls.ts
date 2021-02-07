@@ -6,21 +6,24 @@ class CameraControllerManager extends Schema {
     @type([ "string"])
     ctor = new ArraySchema<string>();
 
-    constructor() {
+    @type("string")
+    player: string;
+
+    constructor(player: string) {
         super();
+        this.player = player;
         // For now this is HARDCODED ?
-        this.ctor.push("@entity-player1");
         this.ctor.push("@ref-domElement");
     }
 }
 
 class CameraControlsComponents extends Schema {
     @type(CameraControllerManager)
-    canonController: CameraControllerManager
+    cameraController: CameraControllerManager
 
     constructor() {
         super();
-        this.canonController = new CameraControllerManager();
+        this.cameraController = new CameraControllerManager("@entity-player-1");
     }
 } 
 

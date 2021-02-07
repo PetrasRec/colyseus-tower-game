@@ -18,11 +18,11 @@ class CanonController extends Schema {
 
 class PlayerComponents extends Schema {
     @type(CanonController)
-    canonController: CanonController
+    cannonController: CanonController
 
     constructor() {
         super();
-        this.canonController = new CanonController(10, 10);
+        this.cannonController = new CanonController(10, 10);
     }
 } 
 
