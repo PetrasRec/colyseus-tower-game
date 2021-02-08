@@ -2,6 +2,7 @@ import Entity from "./entity";
 import { Schema, type } from "@colyseus/schema";
 import Position from "./position";
 import { AuthUser } from "../rooms/AuthUser";
+import { PITCH_RANGE } from "./constants";
 
 class CanonController extends Schema {
     @type("number")
@@ -11,8 +12,20 @@ class CanonController extends Schema {
 
     constructor(yaw: number, pitch: number) {
         super();
+        // around
         this.yaw = yaw;
+        // up and down
         this.pitch = pitch;
+    }
+
+    adjust() {
+        this.yaw %= (2 * Math.PI);
+        if (this.yaw < 0) {
+            this.yaw += (2 * Math.PI);
+        }
+        this.pitch = this.pitch > PITCH_RANGE[1] ? PITCH_RANGE[1] : this.pitch;
+        this.pitch = this.pitch < PITCH_RANGE[0] ? PITCH_RANGE[0] : this.pitch;
+        
     }
 }
 
@@ -22,12 +35,19 @@ class PlayerComponents extends Schema {
 
     constructor() {
         super();
-        this.cannonController = new CanonController(10, 10);
+        this.cannonController = new CanonController((180*Math.PI) / 180, (-5*Math.PI) / 180);
     }
 } 
 
+enum PlayerMove {
+    LEFT = 0,
+    RIGHT = 1,
+    UP = 2,
+    DOWN = 3,
+    SHOOT = 4
+}
 
-export default class Player extends Entity {
+class Player extends Entity {
     @type(PlayerComponents)
     components: PlayerComponents
 
@@ -51,10 +71,37 @@ export default class Player extends Entity {
     }
 
     update(): boolean {
-        
         return true;
     }
+
+    onMove(move: PlayerMove) {
+        switch (move) {
+            case PlayerMove.UP:
+            console.log("Pressed up");
+            this.components.cannonController.pitch+= 0.1;
+            break;
+            case PlayerMove.DOWN: 
+            console.log("Pressed down");
+            this.components.cannonController.pitch-=0.1;
+            break;
+            case PlayerMove.LEFT: 
+            console.log("Pressed left");
+            this.components.cannonController.yaw+=0.1;
+            break;
+            case PlayerMove.RIGHT: 
+            console.log("Pressed right");
+            this.components.cannonController.yaw-=0.1;
+            break;
+        }
+        this.components.cannonController.adjust();
+    }
+
     getRootName(): string {
         return "player";
     }
+}
+
+export {
+    Player,
+    PlayerMove,
 }

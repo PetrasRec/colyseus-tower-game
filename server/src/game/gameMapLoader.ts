@@ -1,7 +1,7 @@
 import { Schema, type, ArraySchema, MapSchema } from "@colyseus/schema";
 import CameraControls from "./CameraControls";
 import Entity from "./entity";
-import Player from "./Player";
+import { Player } from "./Player";
 import Position from "./position";
 import Terrain from "./Terrain";
 import Tower from "./Tower";

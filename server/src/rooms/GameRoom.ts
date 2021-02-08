@@ -38,12 +38,11 @@ export class GameRoom extends Room {
   }
 
   // data must have a token
-  onPlayerInput(client: Client, data: any) {
-    this.state.onPlayerInput(client.sessionId, data);
+  onPlayerInput = (client: Client, data: any) => {
+    this.state.onPlayerInput(client.sessionId, <number[]>data);
   }
 
   onCreate (options: any) {
-    MapLoader("Badwater");
     const userData = verifyJwtToken(options.token);
     console.log("On Create room", options);
     this.setState(new GameRoomState(options?.title, userData.id));

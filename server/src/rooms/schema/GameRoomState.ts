@@ -43,9 +43,12 @@ export class GameRoomState extends Schema {
     this.warmupTimeSeconds = WARMUP_TIME;
   }
   
-  onPlayerInput(sessionID: string, data: any) {
+  onPlayerInput(sessionID: string, data: number[]) {
       const player : AuthUser = this.playerMap.get(sessionID);
-      
+      if (player === null || player === undefined) {
+        return;
+      }
+      this.gameState.onPlayerInput(player, data);
   }
 
   update() {
@@ -72,8 +75,8 @@ export class GameRoomState extends Schema {
       throw new Error("max player count reached");
     }
 
-    this.playerSet.add(player.socketId);
-    this.playerMap.set(player.id, player);
+    this.playerSet.add(player.id);
+    this.playerMap.set(player.socketId, player);
   }
 
   removePlayer(player: AuthUser) {

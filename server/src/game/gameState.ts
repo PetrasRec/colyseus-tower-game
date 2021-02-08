@@ -1,5 +1,5 @@
 import { Schema, type, ArraySchema, MapSchema } from "@colyseus/schema";
-import Player from "./Player";
+import { Player, PlayerMove } from "./Player";
 import Entity from "./entity";
 import Tower from "./Tower";
 import CameraControls from "./CameraControls";
@@ -57,6 +57,7 @@ export class GameState extends Schema {
   onSecondPassed() {
     // Reduce turn time
     this.turnTime--;
+    console.log(this.turnTime);
   }
 
   update() {
@@ -68,16 +69,21 @@ export class GameState extends Schema {
     if (this.turnTime <= 0) {
       this.setNextPlayerTurn();
     }
-
-    console.log(this.turnTime)
   }
 
-  onPlayerInput(user: AuthUser, input: any) {
-    const player = this.players.find((p) => p?.authUser?.id == user?.id);
-    if (player == null || player == undefined) {
+  onPlayerInput(user: AuthUser, inputs: number[]) {
+    let player = this.players[this.playerTurnIndex];
+
+    if (player.authUser === null || player.authUser === undefined) {
       return;
     }
-    // Do some kind of switch and change cannon pitch / yaw or fire based on input
+    if (player.authUser.id !== user.id) {
+      return;
+    }
+
+    inputs.forEach(key => {
+      player.onMove(key);
+    });
   }
 
   setNextPlayerTurn() {
