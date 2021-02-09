@@ -11,6 +11,14 @@ import MapLoader from "./gameMapLoader";
 import { AuthUser } from "../rooms/AuthUser";
 import { load } from "dotenv/types";
 import { TURN_TIME } from "./constants";
+import Projectile from "./Projectile";
+
+enum GameStateEnum {
+  PLAYER_MOVE = 0,
+  SWITCH_PLAYER = 1,
+  BALL_CAM = 2,
+}
+
 
 export class GameState extends Schema {
   @type([Entity])
@@ -30,6 +38,13 @@ export class GameState extends Schema {
 
   @type("number")
   public turnTime: number;
+
+  @type("number")
+  public enumState: GameStateEnum;
+  // This is kinda dumb, but this var represents a state after a players shoots a ball.
+  // You have to wait till the ball hits the target or is deleted.
+  @type("boolean")
+  public waitingForMoveToFinish: boolean = false;
 
   constructor(usersJoined: MapSchema<AuthUser>) {
     super();
@@ -56,7 +71,7 @@ export class GameState extends Schema {
 
   onSecondPassed() {
     // Reduce turn time
-    this.turnTime--;
+    //this.turnTime--;
     console.log(this.turnTime);
   }
 
@@ -71,6 +86,21 @@ export class GameState extends Schema {
     }
   }
 
+  shoot(player: Player) {
+    // where the bulelt should be spawned
+    const ballPosition = new Position(player.position.x, player.position.y, player.position.z);
+    // calculate its trajectory
+    const { yaw, pitch } = player.components.cannonController;
+    const vx = Math.cos(yaw) * Math.cos(-pitch);
+    const vy = Math.sin(yaw) * Math.cos(-pitch);
+    const vz = Math.sin(pitch);
+    const ballVector = new Position(vx, vy, vz);
+
+    console.log("SHOT", ballVector.x, ballVector.y, ballVector.z, this.entities.length);
+    this.entities.push(new Projectile(ballPosition, ballVector, 1))
+    this.enumState = GameStateEnum.BALL_CAM
+  }
+
   onPlayerInput(user: AuthUser, inputs: number[]) {
     let player = this.players[this.playerTurnIndex];
 
@@ -81,9 +111,17 @@ export class GameState extends Schema {
       return;
     }
 
-    inputs.forEach(key => {
-      player.onMove(key);
-    });
+    for (let keyCode of inputs) {
+      if (keyCode === PlayerMove.SHOOT) {
+        if (this.enumState !== GameStateEnum.PLAYER_MOVE) {
+         // continue;
+        }
+        // Shoot and after a hit switch Player turn
+        this.shoot(player);
+      } else {
+        player.onMove(keyCode);
+      }
+    }
   }
 
   setNextPlayerTurn() {
@@ -91,6 +129,7 @@ export class GameState extends Schema {
     this.turnTime = TURN_TIME;
     // Switch camera to target current player.
     const player = this.players[this.playerTurnIndex];
+    this.enumState = GameStateEnum.PLAYER_MOVE;
 
     (this.entities.find((entity) => {
       return entity.name === 'cameraControls';

@@ -72,15 +72,11 @@ class Player extends Entity {
     @type(AuthUser)
     authUser: AuthUser;
 
-    @type("number")
-    health: number;
-
     @type("boolean")
     isAlive: boolean;
 
     constructor(position: Position, id: number) {
         super("@ref-scene", "@model-cannon", "player", position);
-        this.health = 5;
         this.components = new PlayerComponents();
         this.updateRootNameID(id);
     }
@@ -91,7 +87,6 @@ class Player extends Entity {
     }
 
     update(): boolean {
-        this.components.cannonInfoDisplay.hp = this.health;
         return true;
     }
 

@@ -2,38 +2,32 @@ import Entity from "./entity";
 import { Schema, type } from "@colyseus/schema";
 import Position from "./position";
 
-class ProjectileController extends Schema {
+
+export default class Projectile extends Entity {
+
     @type(Position)
     vector: Position;
 
-    constructor() {
-        super();
-        this.vector = new Position(0,0,0);
-    }
-}
+    @type("number")
+    lifeTime: number = 100;
 
-class ProjectileComponents extends Schema {
-    @type(ProjectileController)
-    canonController: ProjectileController
-
-    constructor() {
-        super();
-        this.canonController = new ProjectileController();
-    }
-} 
-
-
-export default class Projectile extends Entity {
-    @type(ProjectileComponents)
-    components: ProjectileComponents
-
-    constructor(position: Position) {
-        super("@ref-scene", "@model-cannon", "projectile");
-        this.components = new ProjectileComponents();
+    constructor(position: Position, vector: Position, id: number) {
+        super("@ref-scene", null, "projectile", position);
+        this.updateRootNameID(id);
+        this.vector = vector;
     }
     
     update() {
+
+        this.position.x += this.vector.x;
+        this.position.y += this.vector.y;
+        this.position.z += this.vector.z;
+        this.lifeTime-=1;
         
+        if (this.lifeTime <= 0) {
+            return false;
+        }
+        return true;
     }
     
     getRootName(): string {
