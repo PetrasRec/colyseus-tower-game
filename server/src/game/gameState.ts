@@ -88,15 +88,13 @@ export class GameState extends Schema {
 
   shoot(player: Player) {
     // where the bulelt should be spawned
-    const ballPosition = new Position(player.position.x, player.position.y, player.position.z);
+    const ballPosition = new Position(player.position.x, player.position.y + 1.1, player.position.z);
     // calculate its trajectory
     const { yaw, pitch } = player.components.cannonController;
-    const vx = Math.cos(yaw) * Math.cos(-pitch);
-    const vy = Math.sin(yaw) * Math.cos(-pitch);
-    const vz = Math.sin(pitch);
+    const vx = -Math.cos(yaw) * Math.cos(pitch);
+    const vy = Math.sin(-pitch);
+    const vz = Math.sin(yaw) * Math.cos(pitch);
     const ballVector = new Position(vx, vy, vz);
-
-    console.log("SHOT", ballVector.x, ballVector.y, ballVector.z, this.entities.length);
     this.entities.push(new Projectile(ballPosition, ballVector, 1))
     this.enumState = GameStateEnum.BALL_CAM
   }
