@@ -29,13 +29,31 @@ class CanonController extends Schema {
     }
 }
 
+class CannonInfoDisplay extends Schema {
+
+    @type("number")
+    hp: number //Integer between 0 and 5
+    @type("string")
+    name: string
+
+    constructor(hp: number, name: string) {
+        super();
+        this.hp = hp;
+        this.name = name;
+    }
+}
+
 class PlayerComponents extends Schema {
     @type(CanonController)
     cannonController: CanonController
 
+    @type(CannonInfoDisplay)
+    cannonInfoDisplay: CannonInfoDisplay
+
     constructor() {
         super();
         this.cannonController = new CanonController((180*Math.PI) / 180, (-5*Math.PI) / 180);
+        this.cannonInfoDisplay = new CannonInfoDisplay(5, "Dummy cannon")
     }
 } 
 
@@ -62,15 +80,18 @@ class Player extends Entity {
 
     constructor(position: Position, id: number) {
         super("@ref-scene", "@model-cannon", "player", position);
+        this.health = 5;
         this.components = new PlayerComponents();
         this.updateRootNameID(id);
     }
 
     assignAuthUser(authUser: AuthUser) {
-        this.authUser = authUser; 
+        this.authUser = authUser;
+        this.components.cannonInfoDisplay.name = this.authUser.username;
     }
 
     update(): boolean {
+        this.components.cannonInfoDisplay.hp = this.health;
         return true;
     }
 
