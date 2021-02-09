@@ -99,19 +99,19 @@ class Player extends Entity {
         switch (move) {
             case PlayerMove.UP:
             console.log("Pressed up");
-            this.components.cannonController.pitch+= 0.1;
+            this.components.cannonController.pitch+= 0.03;
             break;
             case PlayerMove.DOWN: 
             console.log("Pressed down");
-            this.components.cannonController.pitch-=0.1;
+            this.components.cannonController.pitch-=0.03;
             break;
             case PlayerMove.LEFT: 
             console.log("Pressed left");
-            this.components.cannonController.yaw+=0.1;
+            this.components.cannonController.yaw+=0.03;
             break;
             case PlayerMove.RIGHT: 
             console.log("Pressed right");
-            this.components.cannonController.yaw-=0.1;
+            this.components.cannonController.yaw-=0.03;
             break;
         }
         this.components.cannonController.adjust();
