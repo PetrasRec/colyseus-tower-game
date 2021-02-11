@@ -97,7 +97,7 @@ class Player extends Entity {
         if (this.tower) {
             this.tower.visual = `@model-tower_${this.components.cannonInfoDisplay.hp}_hp`;
         }
-        
+
         if (this.components.cannonInfoDisplay.hp <= 0) {
             this.isAlive = false;
         }
@@ -109,7 +109,7 @@ class Player extends Entity {
     }
 
     update(): boolean {
-        return true;
+        return this.isAlive;
     }
 
     onMove(move: PlayerMove) {
