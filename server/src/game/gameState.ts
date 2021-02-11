@@ -161,6 +161,7 @@ class GameState extends Schema {
     this.entities.push(new Projectile(ballPosition, ballVector, player, 1))
     this.enumState = GameStateEnum.BALL_CAM
     this.camera.components.cameraController.entity = `@entity-projectile-1`;
+    this.camera.components.cameraController.maxDistance = 30;
 
   }
 
@@ -198,9 +199,8 @@ class GameState extends Schema {
     }
     this.enumState = GameStateEnum.PLAYER_MOVE;
 
-    (this.entities.find((entity) => {
-      return entity.name === 'cameraControls';
-    }) as CameraControls).components.cameraController.entity = `@entity-${player.name}`
+    this.camera.components.cameraController.entity = `@entity-${player.name}`
+    this.camera.components.cameraController.maxDistance = 80;
   }
 
 

@@ -9,9 +9,13 @@ class CameraControllerManager extends Schema {
     @type("string")
     entity: string;
 
-    constructor(player: string) {
+    @type("number")
+    maxDistance: number
+
+    constructor(player: string, maxDistance: number) {
         super();
         this.entity = player;
+        this.maxDistance = maxDistance
         // For now this is HARDCODED ?
         this.ctor.push("@ref-domElement");
     }
@@ -23,7 +27,7 @@ class CameraControlsComponents extends Schema {
 
     constructor() {
         super();
-        this.cameraController = new CameraControllerManager("@entity-player-1");
+        this.cameraController = new CameraControllerManager("@entity-player-1", 80);
     }
 } 
 
