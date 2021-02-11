@@ -7,11 +7,11 @@ class CameraControllerManager extends Schema {
     ctor = new ArraySchema<string>();
 
     @type("string")
-    player: string;
+    entity: string;
 
     constructor(player: string) {
         super();
-        this.player = player;
+        this.entity = player;
         // For now this is HARDCODED ?
         this.ctor.push("@ref-domElement");
     }

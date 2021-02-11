@@ -198,7 +198,7 @@ class GameState extends Schema {
 
     (this.entities.find((entity) => {
       return entity.name === 'cameraControls';
-    }) as CameraControls).components.cameraController.player = `@entity-${player.name}`
+    }) as CameraControls).components.cameraController.entity = `@entity-${player.name}`
   }
 
 
