@@ -5,8 +5,8 @@ export default class DirectionalLight extends Entity {
     constructor() {
         super("@ref-scene", "@light-directional-0.6", "directionalLight");
     }
-    update() {
-        
+    update() : boolean {
+        return true;
     }
     
     getRootName(): string {

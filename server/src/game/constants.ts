@@ -1,5 +1,5 @@
 
-const GRAVITY_POWER = 5.0;
+const GRAVITY_POWER = 0.02;
 const TURN_TIME = 30;
 const WARMUP_TIME = 5;
 

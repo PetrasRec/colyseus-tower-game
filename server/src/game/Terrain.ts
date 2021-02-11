@@ -7,8 +7,8 @@ export default class Terrain extends Entity {
         super("@ref-scene", "@model-terrain", "terrain");
     }
     
-    update() {
-        
+    update() : boolean {
+        return true
     }
     
     getRootName(): string {

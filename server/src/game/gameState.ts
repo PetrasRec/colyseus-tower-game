@@ -48,7 +48,7 @@ export class GameState extends Schema {
 
   constructor(usersJoined: MapSchema<AuthUser>) {
     super();
-    const loadedMapData = MapLoader("Badwater")
+    const loadedMapData = MapLoader("Badwater", usersJoined.size)
     this.entities = loadedMapData.entities;
     this.players = loadedMapData.players;
     this.camera = loadedMapData.camera;
@@ -68,34 +68,75 @@ export class GameState extends Schema {
       index++;
     }
   }
-
+  
   onSecondPassed() {
     // Reduce turn time
-    //this.turnTime--;
-    console.log(this.turnTime);
+    if (this.enumState === GameStateEnum.PLAYER_MOVE) {
+      this.turnTime--;
+    }
+  }
+
+  onEntityDelete(entity: Entity) {
+    if (entity instanceof Projectile) {
+      this.enumState = GameStateEnum.SWITCH_PLAYER;
+    }
+  }
+
+  updateEntity(entity: Entity) {
+    let isEntityAlive = entity.update();
+    if (!isEntityAlive) {
+      this.onEntityDelete(entity);
+    }
+
+    // dumb logic, but will work for this project.. xd
+    if (entity instanceof Projectile) {
+      const projectile = <Projectile>entity;
+      for (let player of this.players) {
+        if (player.name === projectile.ownerName || !player.isAlive) {
+          continue;
+        }
+        // check collisions
+        const radius = 4;
+        const posA = player.position;
+        const posB = entity.position;
+        // Calculate dumb dist ignoring y
+        const dist = Math.sqrt(Math.pow(posA.x - posB.x, 2) + Math.pow(posA.z  - posB.z, 2));
+        if (radius > dist && posB.y < posA.y) {
+          player.damage();
+          if(isEntityAlive) {
+            this.onEntityDelete(entity);
+            isEntityAlive = false;
+          }
+          return isEntityAlive;
+        }
+      }
+    }
+    return isEntityAlive;
   }
 
   update() {
     // Update game entities
-    this.entities.forEach(e => e.update());
+    this.entities = this.entities.filter(this.updateEntity.bind(this));
     // TODO: collisions ? DAMAGE PLAYERS etc.
 
     // Skip current player's turn
-    if (this.turnTime <= 0) {
+    if (this.turnTime <= 0 || this.enumState == GameStateEnum.SWITCH_PLAYER) {
       this.setNextPlayerTurn();
     }
   }
 
+ 
+
   shoot(player: Player) {
     // where the bulelt should be spawned
-    const ballPosition = new Position(player.position.x, player.position.y + 1.1, player.position.z);
+    const ballPosition = new Position(player.position.x, player.position.y + 1.4, player.position.z);
     // calculate its trajectory
     const { yaw, pitch } = player.components.cannonController;
     const vx = -Math.cos(yaw) * Math.cos(pitch);
     const vy = Math.sin(-pitch);
     const vz = Math.sin(yaw) * Math.cos(pitch);
     const ballVector = new Position(vx, vy, vz);
-    this.entities.push(new Projectile(ballPosition, ballVector, 1))
+    this.entities.push(new Projectile(ballPosition, ballVector, player.name, 1))
     this.enumState = GameStateEnum.BALL_CAM
   }
 
@@ -112,7 +153,7 @@ export class GameState extends Schema {
     for (let keyCode of inputs) {
       if (keyCode === PlayerMove.SHOOT) {
         if (this.enumState !== GameStateEnum.PLAYER_MOVE) {
-         // continue;
+          continue;
         }
         // Shoot and after a hit switch Player turn
         this.shoot(player);

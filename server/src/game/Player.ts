@@ -3,6 +3,7 @@ import { Schema, type } from "@colyseus/schema";
 import Position from "./position";
 import { AuthUser } from "../rooms/AuthUser";
 import { PITCH_RANGE } from "./constants";
+import Tower from "./Tower";
 
 class CanonController extends Schema {
     @type("number")
@@ -73,12 +74,28 @@ class Player extends Entity {
     authUser: AuthUser;
 
     @type("boolean")
-    isAlive: boolean;
+    isAlive: boolean = true;
 
-    constructor(position: Position, id: number) {
+    @type(Tower)
+    tower: Tower;
+
+    constructor(position: Position, tower: Tower, id: number) {
         super("@ref-scene", "@model-cannon", "player", position);
         this.components = new PlayerComponents();
         this.updateRootNameID(id);
+        this.tower = tower;
+    }
+
+    damage() {
+        this.components.cannonInfoDisplay.hp--;
+        if (this.tower) {
+            this.tower.visual = `@model-tower_${1}_hp`;
+        }
+
+        console.log(this.visual);
+        if (this.components.cannonInfoDisplay.hp < 0) {
+            this.isAlive = false;
+        }
     }
 
     assignAuthUser(authUser: AuthUser) {

@@ -15,7 +15,7 @@ export class GameRoom extends Room {
   startGameLoop = () =>  {
     // create gameState and set up some vars
     this.state.startGame();
-    const loopInterval = 100;
+    const loopInterval = 50;
     this.gameLoop = this.clock.setInterval(this.updateState, loopInterval);
     this.timerLoop = this.clock.setInterval(this.onSecondPassed, 1000)
   }

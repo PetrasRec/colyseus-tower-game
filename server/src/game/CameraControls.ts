@@ -36,8 +36,8 @@ export default class CameraControls extends Entity {
         super("@ref-scene", null, "cameraControls", position)
         this.components = new CameraControlsComponents();
     }
-    update() {
-        
+    update() : boolean {
+        return true;
     }
     
     getRootName(): string {

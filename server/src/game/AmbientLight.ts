@@ -6,8 +6,8 @@ export default class AmbientLight extends Entity {
     constructor() {
         super("@ref-scene", "@light-ambient-0.2", "ambientLight");
     }
-    update() {
-        
+    update() : boolean {
+        return true;
     }
     
     getRootName(): string {

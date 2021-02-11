@@ -14,14 +14,14 @@ class MapData {
     camera: CameraControls;
 }
 
-const loadBadwater = () : MapData => {
+const loadBadwater = (playerCount: number) : MapData => {
     // Set up 4 towers
     const towers = [
         new Tower(new Position(25, 15, 25), 1),
         new Tower(new Position(-25, 15, -25), 2),
         new Tower(new Position(-25, 15, 25), 3),
         new Tower(new Position(25, 15, -25), 4),
-    ];
+    ].filter((t, index) => index < playerCount);
 
     const camera = new CameraControls(new Position(0, 0 ,0));
 
@@ -32,7 +32,7 @@ const loadBadwater = () : MapData => {
     directionalLight.position = new Position(0,5,10)
 
     const players = towers.map((t, index) => {
-        return new Player(new Position(t.position.x, t.position.y + 12.3, t.position.z), index + 1)
+        return new Player(new Position(t.position.x, t.position.y + 12.3, t.position.z), t, index + 1)
     });
     const terrain = new Terrain();
 
@@ -53,10 +53,10 @@ const loadBadwater = () : MapData => {
     };
 };
 
-const MapLoader = (mapName: string): MapData => {
+const MapLoader = (mapName: string, playerCount: number): MapData => {
     switch (mapName) {
         case "Badwater":
-            return loadBadwater();
+            return loadBadwater(playerCount);
         default:
             return null;
     }

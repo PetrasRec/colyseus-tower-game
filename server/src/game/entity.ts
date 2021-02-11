@@ -21,7 +21,7 @@ export default abstract class Entity extends Schema  {
         this.position = position;
     }
 
-    abstract update(): void;
+    abstract update(): boolean;
     abstract getRootName(): string;
     
     updateRootNameID(newID: number) : void {

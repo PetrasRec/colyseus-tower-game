@@ -4,13 +4,14 @@ import Position from "./position";
 
 
 export default class Tower extends Entity {
+    
     constructor(position: Position, id: number) {
         super("@ref-scene", "@model-tower", "tower", position)
         this.updateRootNameID(id);
     }
 
-    update() {
-        
+    update() : boolean  {
+        return true;
     }
     
     getRootName(): string {
