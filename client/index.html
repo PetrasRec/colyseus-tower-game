@@ -31,9 +31,9 @@
     <script>
       var host = (window.document.location.host || "localhost").replace(/:.*/, '');
       var client = new Colyseus.Client('ws://' + host + ':2567');
-      console.log(client);
-      var room;
 
+      var room;
+    
       function addListeners (room) {
           console.log('joined!');
           room.onMessage("*", (type, message) => {
@@ -54,7 +54,7 @@
       }
       
       function join () {
-          client.join('game_room', { title: document.getElementById('room_name').value }).then((r) => {
+          client.join('game_room', { title: document.getElementById('room_name').value, token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwMTZlMDM3NDllZjJiMmVmYzkwZDUwMyIsInVzZXJuYW1lIjoiTWFubyB1c2VybmFtZSIsImlhdCI6MTYxMjExMTkyNywiZXhwIjoxNzEyMTExOTI3fQ.am5aUzGVA7hcEG5t0ERgND5On6Y83KZJ8KUbvtLtcKo"  }).then((r) => {
               room = r;
               addListeners(room);
           }).catch(e => {
@@ -71,9 +71,10 @@
       }
 
       async function joinOrCreate () {
-        client.joinOrCreate('game_room', { title: document.getElementById('room_name').value }).then((r) => {
-              console.log(r);
+        client.joinOrCreate('game_room', { title: document.getElementById('room_name').value, 
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwMTZlMDM3NDllZjJiMmVmYzkwZDUwMyIsInVzZXJuYW1lIjoiTWFubyB1c2VybmFtZSIsImlhdCI6MTYxMjExMTkyNywiZXhwIjoxNzEyMTExOTI3fQ.am5aUzGVA7hcEG5t0ERgND5On6Y83KZJ8KUbvtLtcKo" }).then((r) => {
               room = r;
+              console.log(client, r)
               addListeners(room);
           }).catch((e) => {
             console.log(e);
