@@ -76,6 +76,12 @@ class Player extends Entity {
     @type("boolean")
     isAlive: boolean = true;
 
+    @type("number")
+    damageDone: number = 0;
+    
+    @type("number")
+    totalKills: number = 0;
+    
     @type(Tower)
     tower: Tower;
 
@@ -89,11 +95,10 @@ class Player extends Entity {
     damage() {
         this.components.cannonInfoDisplay.hp--;
         if (this.tower) {
-            this.tower.visual = `@model-tower_${1}_hp`;
+            this.tower.visual = `@model-tower_${this.components.cannonInfoDisplay.hp}_hp`;
         }
-
-        console.log(this.visual);
-        if (this.components.cannonInfoDisplay.hp < 0) {
+        
+        if (this.components.cannonInfoDisplay.hp <= 0) {
             this.isAlive = false;
         }
     }

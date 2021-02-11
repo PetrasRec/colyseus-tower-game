@@ -45,7 +45,7 @@ export class GameRoom extends Room {
   onCreate (options: any) {
     const userData = verifyJwtToken(options.token);
     console.log("On Create room", options);
-    this.setState(new GameRoomState(options?.title, userData.id));
+    this.setState(new GameRoomState(options?.title, userData.id, this.roomId));
     this.maxClients = 4;
     this.autoDispose = true;
 

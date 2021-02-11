@@ -1,7 +1,10 @@
 import { Schema, type, MapSchema, SetSchema } from "@colyseus/schema";
 import { WARMUP_TIME } from "../../game/constants";
 import { AuthUser } from "../AuthUser";
-import {GameState} from "../../game/gameState";
+import { GameState, GameStateEnum } from "../../game/gameState";
+import { PlayerStats } from "../../models/PlayerStats";
+import { Lobby } from "../../models/Lobby";
+
 enum LobbyState {
   PLAYING = 1,
   FINISHED = 2,
@@ -11,6 +14,9 @@ enum LobbyState {
 export class GameRoomState extends Schema {
   @type("string")
   public title: string;
+
+  @type("string")
+  public roomId: string;
 
   @type("number")
   public lobbyState : LobbyState;
@@ -34,16 +40,20 @@ export class GameRoomState extends Schema {
 
   @type("string")
   public lobbyOwnerId: string
-  constructor(roomTitle: string, lobbyOwnerId: string) {
+  constructor(roomTitle: string, lobbyOwnerId: string, roomId: string) {
     super();
     this.title = roomTitle;
     this.lobbyState = LobbyState.WAITING_FOR_PLAYERS;
     this.maxPlayers = 4;
     // Set warmup time in seconds
     this.warmupTimeSeconds = WARMUP_TIME;
+    this.roomId = roomId;
   }
   
   onPlayerInput(sessionID: string, data: number[]) {
+      if (this.warmupTimeSeconds > 0) {
+        return;
+      }
       const player : AuthUser = this.playerMap.get(sessionID);
       if (player === null || player === undefined) {
         return;
@@ -51,7 +61,42 @@ export class GameRoomState extends Schema {
       this.gameState.onPlayerInput(player, data);
   }
 
-  update() {
+  async update() {
+    
+    if (this.gameState.enumState === GameStateEnum.WIN_STATE) {
+      if (this.lobbyState !== LobbyState.FINISHED) {
+        console.log("GAME FINISHED!");
+        this.lobbyState = LobbyState.FINISHED;
+        // Save to mongo db game state stuff
+        const winnerPlayer = this.gameState.getWinnerPlayer();
+        let playerStats = [];
+
+        for (let player of this.gameState.players) {
+          if (player.authUser) {
+            const p = new PlayerStats({
+                user_id: player?.authUser?.id,
+                room_id: this.roomId,
+                total_damage: player.damageDone,
+                total_kills: player.totalKills,
+                health_left: player.components.cannonInfoDisplay.hp,
+            });
+            await p.save();
+            playerStats.push(p);
+          }
+        }
+        
+        // after this create a lobby instance in mongoDB
+        const lobby = new Lobby({
+            room_id: this.roomId,
+            winner_user_id: winnerPlayer.authUser.id,
+        });
+        await lobby.save();
+      }
+
+      if (this.gameState.endScreenTime <= 0) {
+        return; // No more game state updates after this.
+      }
+    }
     this.gameState.update();
   }
 

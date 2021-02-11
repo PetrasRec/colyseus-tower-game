@@ -2,6 +2,7 @@ import Entity from "./entity";
 import { Schema, type } from "@colyseus/schema";
 import Position from "./position";
 import { GRAVITY_POWER } from "./constants";
+import { Player } from "./Player";
 
 
 export default class Projectile extends Entity {
@@ -12,14 +13,14 @@ export default class Projectile extends Entity {
     @type("number")
     lifeTime: number = 100;
 
-    @type("string")
-    ownerName: string;
+    @type(Player)
+    owner: Player;
 
-    constructor(position: Position, vector: Position, ownerName: string, id: number) {
+    constructor(position: Position, vector: Position, owner: Player, id: number) {
         super("@ref-scene", null, "projectile", position);
         this.updateRootNameID(id);
         this.vector = vector;
-        this.ownerName = ownerName;
+        this.owner = owner;
     }
     
     update() {

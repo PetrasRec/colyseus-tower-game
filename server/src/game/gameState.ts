@@ -10,17 +10,18 @@ import Position from "./position";
 import MapLoader from "./gameMapLoader";
 import { AuthUser } from "../rooms/AuthUser";
 import { load } from "dotenv/types";
-import { TURN_TIME } from "./constants";
+import { MAX_BULLET_START_SPEED, TURN_TIME } from "./constants";
 import Projectile from "./Projectile";
 
 enum GameStateEnum {
   PLAYER_MOVE = 0,
   SWITCH_PLAYER = 1,
   BALL_CAM = 2,
+  WIN_STATE=3,
 }
 
 
-export class GameState extends Schema {
+class GameState extends Schema {
   @type([Entity])
   entities: ArraySchema<Entity>;
 
@@ -38,6 +39,9 @@ export class GameState extends Schema {
 
   @type("number")
   public turnTime: number;
+
+  @type("number")
+  public endScreenTime: number;
 
   @type("number")
   public enumState: GameStateEnum;
@@ -74,6 +78,9 @@ export class GameState extends Schema {
     if (this.enumState === GameStateEnum.PLAYER_MOVE) {
       this.turnTime--;
     }
+    if (this.endScreenTime > 0) {
+      this.endScreenTime--;
+    }
   }
 
   onEntityDelete(entity: Entity) {
@@ -92,7 +99,7 @@ export class GameState extends Schema {
     if (entity instanceof Projectile) {
       const projectile = <Projectile>entity;
       for (let player of this.players) {
-        if (player.name === projectile.ownerName || !player.isAlive) {
+        if (player.name === projectile.owner.name || !player.isAlive) {
           continue;
         }
         // check collisions
@@ -103,6 +110,10 @@ export class GameState extends Schema {
         const dist = Math.sqrt(Math.pow(posA.x - posB.x, 2) + Math.pow(posA.z  - posB.z, 2));
         if (radius > dist && posB.y < posA.y) {
           player.damage();
+          projectile.owner.damageDone++;
+          if (!player.isAlive) {
+            projectile.owner.totalKills++;
+          }
           if(isEntityAlive) {
             this.onEntityDelete(entity);
             isEntityAlive = false;
@@ -118,13 +129,24 @@ export class GameState extends Schema {
     // Update game entities
     this.entities = this.entities.filter(this.updateEntity.bind(this));
     // TODO: collisions ? DAMAGE PLAYERS etc.
-
+    const playersLeftAlive = this.players.filter(p=>p.isAlive);
+    if (this.enumState === GameStateEnum.WIN_STATE) {
+      return;
+    }
+    if (playersLeftAlive.length === 1) {
+      this.enumState = GameStateEnum.WIN_STATE;
+      this.endScreenTime = 5;
+      return;
+    }
     // Skip current player's turn
     if (this.turnTime <= 0 || this.enumState == GameStateEnum.SWITCH_PLAYER) {
       this.setNextPlayerTurn();
     }
   }
 
+  getWinnerPlayer() {
+    return this.players[this.playerTurnIndex];
+  }
  
 
   shoot(player: Player) {
@@ -135,8 +157,8 @@ export class GameState extends Schema {
     const vx = -Math.cos(yaw) * Math.cos(pitch);
     const vy = Math.sin(-pitch);
     const vz = Math.sin(yaw) * Math.cos(pitch);
-    const ballVector = new Position(vx, vy, vz);
-    this.entities.push(new Projectile(ballPosition, ballVector, player.name, 1))
+    const ballVector = new Position(vx * MAX_BULLET_START_SPEED, vy * MAX_BULLET_START_SPEED, vz * MAX_BULLET_START_SPEED);
+    this.entities.push(new Projectile(ballPosition, ballVector, player, 1))
     this.enumState = GameStateEnum.BALL_CAM
   }
 
@@ -168,6 +190,10 @@ export class GameState extends Schema {
     this.turnTime = TURN_TIME;
     // Switch camera to target current player.
     const player = this.players[this.playerTurnIndex];
+    if (!player.isAlive) {
+      this.setNextPlayerTurn();
+      return;
+    }
     this.enumState = GameStateEnum.PLAYER_MOVE;
 
     (this.entities.find((entity) => {
@@ -176,4 +202,9 @@ export class GameState extends Schema {
   }
 
 
+}
+
+export {
+  GameStateEnum,
+  GameState,
 }

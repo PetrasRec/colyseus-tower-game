@@ -8,6 +8,8 @@ import { monitor } from "@colyseus/monitor";
 import { GameRoom } from "./rooms/GameRoom";
 import { authenticateTokenMiddleware } from "./auth";
 import usersRouter from "./routes/users";
+import lobbyRouter from "./routes/lobby";
+
 import mongoose from "mongoose";
 require('dotenv').config();
 const port = Number(process.env.PORT || 2567);
@@ -43,6 +45,7 @@ app.use("/colyseus", monitor());
 
 // basic api stuff
 app.use("/api/users", usersRouter);
+app.use("/api/lobby", lobbyRouter);
 
 app.get("/auth", authenticateTokenMiddleware, (req: any, res: any) => {
   res.send("Haha");
