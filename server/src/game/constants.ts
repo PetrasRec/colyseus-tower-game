@@ -1,5 +1,5 @@
 
-const GRAVITY_POWER = 0.04;
+const GRAVITY_POWER = 0.08;
 const TURN_TIME = 30;
 const WARMUP_TIME = 5;
 const MAX_BULLET_START_SPEED = 3;

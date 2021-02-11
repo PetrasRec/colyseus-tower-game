@@ -1,15 +1,10 @@
 import { Schema, type, ArraySchema, MapSchema } from "@colyseus/schema";
 import { Player, PlayerMove } from "./Player";
 import Entity from "./entity";
-import Tower from "./Tower";
 import CameraControls from "./CameraControls";
-import AmbientLight from "./AmbientLight";
-import Terrain from "./Terrain";
-import DirectionalLight from "./DirectionalLight";
 import Position from "./position";
 import MapLoader from "./gameMapLoader";
 import { AuthUser } from "../rooms/AuthUser";
-import { load } from "dotenv/types";
 import { MAX_BULLET_START_SPEED, TURN_TIME } from "./constants";
 import Projectile from "./Projectile";
 
@@ -98,6 +93,10 @@ class GameState extends Schema {
     // dumb logic, but will work for this project.. xd
     if (entity instanceof Projectile) {
       const projectile = <Projectile>entity;
+      if (projectile.position.y < 0) {
+        this.onEntityDelete(entity);
+        return false;
+      }
       for (let player of this.players) {
         if (player.name === projectile.owner.name || !player.isAlive) {
           continue;
@@ -108,7 +107,7 @@ class GameState extends Schema {
         const posB = entity.position;
         // Calculate dumb dist ignoring y
         const dist = Math.sqrt(Math.pow(posA.x - posB.x, 2) + Math.pow(posA.z  - posB.z, 2));
-        if (radius > dist && posB.y < posA.y) {
+        if (radius > dist && posB.y < posA.y && posB.y > 15) {
           player.damage();
           projectile.owner.damageDone++;
           if (!player.isAlive) {
@@ -134,6 +133,9 @@ class GameState extends Schema {
       return;
     }
     if (playersLeftAlive.length === 1) {
+      // After the game is over, make current player the focus of the camera.
+      this.camera.components.cameraController.entity = `@entity-${this.players[this.playerTurnIndex].name}`;
+      this.camera.components.cameraController.maxDistance = 30;
       this.enumState = GameStateEnum.WIN_STATE;
       this.endScreenTime = 5;
       return;
