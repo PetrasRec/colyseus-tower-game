@@ -160,6 +160,8 @@ class GameState extends Schema {
     const ballVector = new Position(vx * MAX_BULLET_START_SPEED, vy * MAX_BULLET_START_SPEED, vz * MAX_BULLET_START_SPEED);
     this.entities.push(new Projectile(ballPosition, ballVector, player, 1))
     this.enumState = GameStateEnum.BALL_CAM
+    this.camera.components.cameraController.entity = `@entity-projectile-1`;
+
   }
 
   onPlayerInput(user: AuthUser, inputs: number[]) {
