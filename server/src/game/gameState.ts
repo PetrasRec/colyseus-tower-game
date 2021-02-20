@@ -45,6 +45,9 @@ class GameState extends Schema {
   @type("boolean")
   public waitingForMoveToFinish: boolean = false;
 
+  @type("number")
+  private playerMoveIndex: number = -1;
+
   constructor(usersJoined: MapSchema<AuthUser>) {
     super();
     const loadedMapData = MapLoader("Badwater", usersJoined.size)
@@ -125,6 +128,7 @@ class GameState extends Schema {
   }
 
   update() {
+    this.doPlayerMove();
     // Update game entities
     this.entities = this.entities.filter(this.updateEntity.bind(this));
     // TODO: collisions ? DAMAGE PLAYERS etc.
@@ -167,7 +171,30 @@ class GameState extends Schema {
 
   }
 
+  doPlayerMove() {
+    if (this.playerMoveIndex === -1 || this.playerTurnIndex === -1) {
+      return;
+    }
+    let player = this.players[this.playerTurnIndex];
+    if (this.playerMoveIndex === PlayerMove.SHOOT) {
+      if (this.enumState !== GameStateEnum.PLAYER_MOVE) {
+        this.playerMoveIndex = -1;
+        return
+      }
+      // Shoot and after a hit switch Player turn
+      this.shoot(player);
+      this.playerMoveIndex = -1;
+      return
+    } 
+
+    player.onMove(this.playerMoveIndex);
+    this.playerMoveIndex = -1;
+  }
+
   onPlayerInput(user: AuthUser, inputs: number[]) {
+    if (this.playerTurnIndex === -1) {
+      return;
+    }
     let player = this.players[this.playerTurnIndex];
 
     if (player.authUser === null || player.authUser === undefined) {
@@ -176,18 +203,10 @@ class GameState extends Schema {
     if (player.authUser.id !== user.id) {
       return;
     }
-
-    for (let keyCode of inputs) {
-      if (keyCode === PlayerMove.SHOOT) {
-        if (this.enumState !== GameStateEnum.PLAYER_MOVE) {
-          continue;
-        }
-        // Shoot and after a hit switch Player turn
-        this.shoot(player);
-      } else {
-        player.onMove(keyCode);
-      }
+    if (inputs.length === 0) {
+      return;
     }
+    this.playerMoveIndex = inputs[0];
   }
 
   setNextPlayerTurn() {
