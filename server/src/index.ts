@@ -1,5 +1,7 @@
+import https from "https";
 import http from "http";
 import express from "express";
+import fs from "fs";
 import cors from "cors";
 import { Server } from "colyseus";
 import { monitor } from "@colyseus/monitor";
@@ -17,8 +19,14 @@ const app = express()
 
 app.use(cors());
 app.use(express.json())
-console.log();
-const server = http.createServer(app)
+
+var privateKey  = fs.readFileSync('/home/indeform/ssl/emsmarthouse.com.key', 'utf8');
+var certificate = fs.readFileSync('/home/indeform/ssl/emsmarthouse.com.crt', 'utf8');
+var credentials = {key: privateKey, cert: certificate};
+
+// const server = http.createServer(app)
+const server = https.createServer(credentials, app)
+
 const gameServer = new Server({
   server: server,
   express: app,
