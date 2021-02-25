@@ -20,12 +20,12 @@ const app = express()
 app.use(cors());
 app.use(express.json())
 
-var privateKey  = fs.readFileSync('/home/indeform/ssl/emsmarthouse.com.key', 'utf8');
-var certificate = fs.readFileSync('/home/indeform/ssl/emsmarthouse.com.crt', 'utf8');
-var credentials = {key: privateKey, cert: certificate};
+//var privateKey  = fs.readFileSync('/home/indeform/ssl/emsmarthouse.com.key', 'utf8');
+//var certificate = fs.readFileSync('/home/indeform/ssl/emsmarthouse.com.crt', 'utf8');
+//var credentials = {key: privateKey, cert: certificate};
 
-// const server = http.createServer(app)
-const server = https.createServer(credentials, app)
+const server = http.createServer(app)
+//const server = https.createServer(credentials, app)
 
 const gameServer = new Server({
   server: server,

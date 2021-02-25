@@ -11,6 +11,11 @@ enum LobbyState {
   WAITING_FOR_PLAYERS = 3,
 }
 
+enum ControllerTypes {
+  KEYBOARD= 0,
+  WEBCAM= 1,
+};
+
 export class GameRoomState extends Schema {
   @type("string")
   public title: string;
@@ -38,13 +43,17 @@ export class GameRoomState extends Schema {
   @type("number")
   public warmupTimeSeconds: number;
 
+  @type("number")
+  public controllerType: ControllerTypes;
+
   @type("string")
   public lobbyOwnerId: string
-  constructor(roomTitle: string, lobbyOwnerId: string, roomId: string) {
+  constructor(roomTitle: string, controllerId: ControllerTypes, lobbyOwnerId: string, roomId: string) {
     super();
     this.title = roomTitle;
     this.lobbyState = LobbyState.WAITING_FOR_PLAYERS;
     this.maxPlayers = 4;
+    this.controllerType = controllerId;
     // Set warmup time in seconds
     this.warmupTimeSeconds = WARMUP_TIME;
     this.roomId = roomId;
